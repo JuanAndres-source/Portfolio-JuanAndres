@@ -1,44 +1,31 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { NAV_ITEMS, PERSONAL_INFO } from "@/lib/constants";
+import { NAV_ITEMS } from "@/lib/constants";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { useScrollEffect } from "@/hooks/useScrollEffect";
+// 1. Importamos el hook mágico
+import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
   const { theme, toggleTheme, switchable } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [language, setLanguage] = useState<"es" | "en">("es");
   const { scrollY } = useScrollEffect();
+  
+  // 2. Inicializamos la traducción y el controlador de idioma
+  const { t, i18n } = useTranslation();
 
   // Apply shadow and height change based on scroll
   const isScrolled = scrollY > 10;
 
-  const translations = {
-    es: {
-      home: "Inicio",
-      about: "Sobre mí",
-      education: "Educación",
-      projects: "Proyectos",
-      skills: "Habilidades",
-      languages: "Idiomas",
-      contact: "Contacto",
-      openToOpportunities: "Abierto a oportunidades",
-    },
-    en: {
-      home: "Home",
-      about: "About",
-      education: "Education",
-      projects: "Projects",
-      skills: "Skills",
-      languages: "Languages",
-      contact: "Contact",
-      openToOpportunities: "Open to opportunities",
-    },
+  // 3. Función para cambiar el idioma globalmente
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
   };
 
-  const t = translations[language];
+  // Pequeña ayuda para comprobar el idioma activo (útil por si el navegador detecta 'es-ES' en vez de 'es' a secas)
+  const isCurrentLang = (lng: string) => i18n.language?.startsWith(lng);
 
   return (
     <motion.nav
@@ -77,7 +64,8 @@ export default function Navbar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05, duration: 0.3 }}
               >
-                {t[item.label.toLowerCase() as keyof typeof t] || item.label}
+                {/* 4. Usamos la función t() conectada al JSON */}
+                {t(`nav.${item.label.toLowerCase()}`)}
                 <motion.div
                   className="absolute bottom-0 left-0 h-0.5 bg-primary origin-left"
                   initial={{ scaleX: 0 }}
@@ -98,9 +86,9 @@ export default function Navbar() {
               transition={{ delay: 0.2 }}
             >
               <button
-                onClick={() => setLanguage("es")}
+                onClick={() => changeLanguage("es")}
                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                  language === "es"
+                  isCurrentLang("es")
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground hover:bg-secondary"
                 }`}
@@ -108,9 +96,9 @@ export default function Navbar() {
                 ES
               </button>
               <button
-                onClick={() => setLanguage("en")}
+                onClick={() => changeLanguage("en")}
                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                  language === "en"
+                  isCurrentLang("en")
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground hover:bg-secondary"
                 }`}
@@ -156,7 +144,7 @@ export default function Navbar() {
                 transition={{ duration: 2, repeat: Infinity }}
               />
               <span className="text-xs font-medium text-green-700 dark:text-green-300">
-                {t.openToOpportunities}
+                {t("hero.status")}
               </span>
             </motion.div>
 
@@ -196,7 +184,7 @@ export default function Navbar() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                {t[item.label.toLowerCase() as keyof typeof t] || item.label}
+                {t(`nav.${item.label.toLowerCase()}`)}
               </motion.a>
             ))}
           </motion.div>
